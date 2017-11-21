@@ -39,14 +39,11 @@ class lab_db:
 		self.cur.execute('UPDATE Drug SET Dcount=%d WHRER Did=%d'%(count, Did))
 		self.commit()
 
-	def inst_query(self, Did, sub):
-		count = self.drug_query('Did', Did, 'Dcount').fetchone()[0]
-		if sub > count:
-			return False
-		count -= sub
-		self.cur.execute('UPDATE Drug SET Dcount=%d WHRER Did=%d'%(count, Did))
-		self.commit()
+	def inst_query(self, arg):
+		return self.cur.execute('SEKECT * FROM Insteument ORDER BY %s'%arg).fetchall()
+
+	def inst_get_count():
+		return 
 
 d = lab_db()
-d.inst_add('1',u'联想台式机','xxx','1',1,1,'1','1',1)
-#d.inst_repair(1, 1)
+d.inst_repair(1, 1)
