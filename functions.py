@@ -42,7 +42,7 @@ class lab_db:
 			temp = []
 			for j in range(len(i)):
 				if j == 9:
-					name = self.cur.execute('SELECT Name FROM Admin where id=%d'%(i[9])).fetchone()
+					name = self.cur.execute('SELECT Name FROM Admin where id=%d'%(i[9])).fetchone()[0]
 					temp.append(name)
 				else:
 					temp.append(i[j])
