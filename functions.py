@@ -21,7 +21,7 @@ class lab_db:
 			batch = 0
 		else:
 			batch = batch[0]
-		self.cur.execute('INSERT INTO Instrument(Type, Name, Model, Spec, Cost, Count, Date, Manuf, Resp, Batch) VALUES("%s", "%s", "%s", "%s", %d, %d, "%s", "%s", %d, %d)'%(type, name, model, spec, cost, count, date, manuf, resp, batch + 1))
+		self.cur.execute('INSERT INTO Main(Type, Name, Model, Spec, Cost, Count, Date, Manuf, Resp, Batch) VALUES("%s", "%s", "%s", "%s", %d, %d, "%s", "%s", %d, %d)'%(type, name, model, spec, cost, count, date, manuf, resp, batch + 1))
 		self.conn.commit()
 
 	# incomplete
@@ -35,24 +35,9 @@ class lab_db:
 		self.cur.execute('UPDATE Drug SET Dcount=%d WHRER Did=%d'%(count, Did))
 		self.commit()
 
-	def inst_query(self, order, sort):
-		list = []
-		query = self.cur.execute('SELECT * FROM Instrument ORDER BY %s %s'%(order, sort)).fetchall()
-		for i in query:
-			temp = []
-			for j in range(len(i)):
-				if j == 9:
-					name = self.cur.execute('SELECT Name FROM Admin where id=%d'%(i[9])).fetchone()[0]
-					temp.append(name)
-				else:
-					temp.append(i[j])
-			list.append(temp)
-		return list
-
-	def admin_query(self, user, passw):
-		md5_user = md5.new(user)
-		md5_pass = md5.new(passw)
-		id = self.cur.execute('SELECT ID FROM Admin WHERE User="%s" AND Pass="%s"'%(md5_user.hexdigest(), md5_pass.hexdigest())).fetchone()
-		if id == None:
-			return -1
-		return id
+	def inst_query(self):
+		list = self.cur.execute('SELECT distinct Name,Model,Batch FROM Main').fetchall()
+		result = []
+		for i in list:
+			result.append(self.cur.execute('SELECT Type,Name,Model,Spec,Cost,Count(Batch),Date,Manuf,Resp,Batch,Room FROM Main WHERE Name="%s" AND Model="%s" AND Batch=%s'%(i[0], i[1], i[2])).fetchone())
+		return result

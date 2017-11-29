@@ -3,85 +3,88 @@ import wx
 import wx.grid
 import functions
 
-class LoginFrame(wx.Frame):
-	def __init__(self, parent):
-		wx.Frame.__init__(self, parent, title = u"登陆", size = (100, 120), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
-
-		wx.StaticText(self, -1, u'用户名：', pos = (0, 0))
-		self.uname = wx.TextCtrl(self, -1, pos = (50, 0))
-		wx.StaticText(self, -1, u'密码：', pos = (0, 30))
-		self.upass = wx.TextCtrl(self, -1, pos = (50, 30), style = wx.TE_PASSWORD)
-		self.logbtn = wx.Button(self, -1, u'登录', pos = (0, 60), size = (75, 30))
-		self.anobtn = wx.Button(self, -1, u'游客登录', pos = (80, 60), size = (75, 30))
-
-		self.Bind(wx.EVT_BUTTON, self.Log, self.logbtn)
-		self.Bind(wx.EVT_BUTTON, self.AnoLog, self.anobtn)
-		self.Bind(wx.EVT_CLOSE, self.Exit)
-
-		self.Show()
-
-	def Log(self, event):
-		db = functions.lab_db()
-		uname = self.uname.GetValue()
-		upass = self.upass.GetValue()
-		id = db.admin_query(uname, upass)
-		if id == -1:
-			dialog = wx.MessageDialog(self, u'用户名或密码不正确', style = wx.OK|wx.STAY_ON_TOP|wx.CENTRE)
-			dialog.ShowModal()
-			dialog.Destroy()
-		else:
-			self.Show(False)
-			print 'Logged in, id:',id
-			exit()
-
-	def AnoLog(self, event):
-		self.Show(False)
-		grid = GridFrame(None)
-
-	def Exit(self, event):
-		self.Show(False)
-		exit()
-
 class GridFrame(wx.Frame):
-	colLabel = (u'编号', u'类别', u'设备名', u'型号', u'规格', u'单价', u'数量', u'购置日期', u'生产厂家', u'购买人', u'批次', u'状态')
-	colSize = (30, 80, 200, 50, 50, 50, 30, 70, 80, 55, 30, 40)
+	colLabel = (u'类别', u'设备名', u'型号', u'规格', u'单价', u'数量', u'购置日期', u'生产厂家', u'购买人', u'批次', u'机房')
+	colSize = (80, 200, 50, 50, 50, 30, 70, 80, 55, 30, 55)
+
 	def __init__(self, parent):
+		self.initUI(parent)
+		self.drawTable()
+		print type(self)
+		self.bindEvents()
+
+	def initUI(self, parent):
 		width = 0
 		for i in self.colSize:
 			width += i + 1
-		wx.Frame.__init__(self, parent, size = (width, 360), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
+		wx.Frame.__init__(self, parent, title = u'实验室设备管理系统', size = (width, 360), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
 
-		grid = wx.grid.Grid(self, -1)
+		self.btn1 = wx.Button(self, -1, u'设备入库', (0, 0), (80, 40))
+		self.btn2 = wx.Button(self, -1, u'维修管理', (90, 0), (80, 40))
+		wx.StaticText(self, -1, u'关键字：', (180, 10), (50, 30))
+		self.cb = wx.ComboBox(self, -1, pos = (230, 5), size = (100, 30), choices = ['123','234','345','456'])
+		wx.StaticText(self, -1, u'排序：', (340, 10), (45, 30))
+		self.rb = wx.RadioBox(self, -1, pos = (375, -10), size = (50, 40), choices = ['123', '234'])
+		self.btn3 = wx.Button(self, -1, u'查询', (480, 0), (80, 40))
 
-		db = functions.lab_db()
-		data = db.inst_query('id', 'ASC')
+		self.grid = wx.grid.Grid(self, -1, pos = (0, 40), size = (width, 360))
+		self.Show()
 
-		grid.CreateGrid(0, len(data[0]))
-		grid.SetRowLabelSize(0)
+	def drawTable(self):
+		self.db = functions.lab_db()
+
+		self.grid.CreateGrid(0, len(self.colLabel))
+		self.grid.SetRowLabelSize(0)
 
 		for i in range(len(self.colLabel)):
-			grid.SetColLabelValue(i, self.colLabel[i])
-			grid.SetColSize(i, self.colSize[i])
+			self.grid.SetColLabelValue(i, self.colLabel[i])
+			self.grid.SetColSize(i, self.colSize[i])
 
+		data = self.db.inst_query()
+		self.refreshData(data)
+
+	def bindEvents(self):
+		self.Bind(wx.EVT_BUTTON, self.Warehouse, self.btn1)
+		self.Bind(wx.EVT_BUTTON, self.Repair, self.btn2)
+		self.Bind(wx.EVT_BUTTON, self.Query, self.btn3)
+		self.Bind(wx.EVT_CLOSE, self.Exit)
+
+	def refreshData(self, data):
+		rows = self.grid.GetNumberRows()
+		if rows > 0:
+			self.grid.DeleteRows(numRows = rows)
 		j = 0
 		for line in data:
-			grid.InsertRows(j)
+			self.grid.InsertRows(j)
 			for i in range(len(self.colLabel)):
 				if isinstance(line[i], int):
 					val = '%d'%line[i]
 				else:
 					val = line[i]
-				grid.SetCellValue(j, i, val)
-				grid.SetReadOnly(j, i)
+				self.grid.SetCellValue(j, i, val)
+				self.grid.SetReadOnly(j, i)
 			j += 1
-		self.Bind(wx.EVT_CLOSE, self.Exit)
-		self.Show()
-	
+
+	def Warehouse(self, event):
+		whf = wx.Frame(self, -1, u'', size = (400, 100), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
+		wx.Button(whf, -1, u'123')
+		whf.Bind(wx.EVT_BUTTON, whf.Show(False), whf)
+		whf.Show()
+		while whf.IsShown():
+			pass
+		whf.Destroy()
+
+	def Repair(self, event):
+		pass
+
+	def Query(self, event):
+		pass
+
 	def Exit(self, event):
-		self.Show(False)
+		self.Destroy()
 		exit()
 
 if __name__ == '__main__':
 	app = wx.App()
-	frame = LoginFrame(None)
+	frame = GridFrame(None)
 	app.MainLoop()
