@@ -9,7 +9,7 @@ def init():
 	conn = sqlite3.connect('lab.db')
 	cur = conn.cursor()
 	cur.execute('CREATE TABLE Main(id INTEGER PRIMARY KEY, Type TEXT, Name TEXT, Model TEXT, Spec TEXT, Cost INTEGER, Date TEXT, Manuf TEXT, Resp TEXT, Batch INTEGER, Room TEXT)')
-	cur.execute('CREATE TABLE Repair(id INTEGER PRIMARY KEY, Cost INTEGER, Date TEXT, Manuf TEXT, Resp TEXT, Status TEXT)')
+	cur.execute('CREATE TABLE Repair(id INTEGER PRIMARY KEY, Cost INTEGER, Date TEXT, Serv TEXT, Resp TEXT, Status TEXT)')
 
 	file = open('pre_inst.txt', 'rt')
 	for line in file.readlines():
