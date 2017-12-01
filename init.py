@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sqlite3,os,md5
+import sqlite3,os
 
 def init():
 	if os.path.exists('lab.db'):

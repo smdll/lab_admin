@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sqlite3,sys,md5
+import sqlite3
 
 class lab_db:
 	def __init__(self):
@@ -14,14 +14,8 @@ class lab_db:
 		self.conn.commit()
 		self.conn.close()
 
-	# incomplete
-	def inst_add(self, type, name, model, spec, cost, count, date, manuf, resp):
-		batch = self.cur.execute('SELECT Batch FROM Instrument WHERE Name="%s" AND Model="%s" ORDER BY Batch DESC'%(name, model)).fetchone()
-		if batch == None:
-			batch = 0
-		else:
-			batch = batch[0]
-		self.cur.execute('INSERT INTO Main(Type, Name, Model, Spec, Cost, Count, Date, Manuf, Resp, Batch) VALUES("%s", "%s", "%s", "%s", %d, %d, "%s", "%s", %d, %d)'%(type, name, model, spec, cost, count, date, manuf, resp, batch + 1))
+	def inst_add(self, type, name, model, spec, cost, date, manuf, resp, batch, room):
+		self.cur.execute('INSERT INTO Main(Type,Name,Model,Spec,Cost,Date,Manuf,Resp,Batch,Room) VALUES("%s", "%s", "%s", "%s", %d, "%s", "%s", "%s", %d, "%s")'%(type, name, model, spec, cost, date, manuf, resp, batch, room))
 		self.conn.commit()
 
 	# incomplete
@@ -35,9 +29,9 @@ class lab_db:
 		self.cur.execute('UPDATE Drug SET Dcount=%d WHRER Did=%d'%(count, Did))
 		self.commit()
 
-	def inst_query(self):
-		list = self.cur.execute('SELECT distinct Name,Model,Batch FROM Main').fetchall()
+	def inst_query(self, keyword, sort):
+		list = self.cur.execute('SELECT distinct Name,Model,Batch FROM Main ORDER BY %s %s'%(keyword, sort)).fetchall()
 		result = []
 		for i in list:
-			result.append(self.cur.execute('SELECT Type,Name,Model,Spec,Cost,Count(Batch),Date,Manuf,Resp,Batch,Room FROM Main WHERE Name="%s" AND Model="%s" AND Batch=%s'%(i[0], i[1], i[2])).fetchone())
+			result.append(self.cur.execute('SELECT Type,Name,Model,Spec,Cost,Count(Batch),Date,Manuf,Resp,Batch,Room FROM Main WHERE Name="%s" AND Model="%s" AND Batch=%s ORDER BY %s %s'%(i[0], i[1], i[2], keyword, sort)).fetchone())
 		return result
