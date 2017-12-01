@@ -17,6 +17,12 @@ def init():
 		cur.execute("INSERT INTO Main(id, Type, Name, Model, Spec, Cost, Date, Manuf, Resp, Batch, Room) VALUES(%d, '%s', '%s', '%s', '%s', %d, '%s', '%s', '%s', %d, '%s')"%(int(para[0]), para[1], para[2], para[3], para[4], int(para[5]), para[6], para[7], para[8], int(para[9]), para[10]))
 	file.close()
 
+	file = open('pre_repair.txt', 'rt')
+	for line in file.readlines():
+		para = line[:-1].split(',')
+		cur.execute("INSERT INTO Repair(id, Cost, Date, Serv, Resp, Status) VALUES(%d, %d, '%s', '%s', '%s', '%s')"%(int(para[0]), int(para[1]), para[2], para[3], para[4], para[5]))
+	file.close()
+
 	conn.commit()
 	conn.close()
 

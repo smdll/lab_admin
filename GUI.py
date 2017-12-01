@@ -13,6 +13,7 @@ class GridFrame(wx.Frame):
 		self.drawTable()
 		self.bindEvents()
 
+	# Initialize the graphical interface
 	def initUI(self, parent):
 		width = 0
 		for i in self.colSize:
@@ -22,7 +23,7 @@ class GridFrame(wx.Frame):
 		self.btn1 = wx.Button(self, -1, u'设备入库', (0, 0), (80, 40))
 		self.btn2 = wx.Button(self, -1, u'维修管理', (90, 0), (80, 40))
 		wx.StaticText(self, -1, u'关键字：', (180, 10), (50, 30))
-		self.cb = wx.ComboBox(self, -1, pos = (230, 5), size = (100, 30), choices = [i for i in self.colLabel if i != self.colLabel[5]])
+		self.cb = wx.ComboBox(self, -1, pos = (230, 5), size = (100, 30), choices = [i for i in self.colLabel[:-1] if i != self.colLabel[5]])
 		wx.StaticText(self, -1, u'排序：', (340, 10), (45, 30))
 		self.rb = wx.RadioBox(self, -1, pos = (375, -10), size = (50, 40), choices = [u'升序', u'降序'])
 		self.btn3 = wx.Button(self, -1, u'查询', (480, 0), (80, 40))
@@ -30,6 +31,7 @@ class GridFrame(wx.Frame):
 		self.grid = wx.grid.Grid(self, -1, pos = (0, 40), size = (width, 360))
 		self.Show()
 
+	# Draw the table and put some data on
 	def drawTable(self):
 		self.db = functions.lab_db()
 
@@ -42,12 +44,14 @@ class GridFrame(wx.Frame):
 
 		self.refreshData('id', 'ASC')
 
+	# Bind all events in need
 	def bindEvents(self):
 		self.Bind(wx.EVT_BUTTON, self.Warehouse, self.btn1)
 		self.Bind(wx.EVT_BUTTON, self.Repair, self.btn2)
 		self.Bind(wx.EVT_BUTTON, self.Query, self.btn3)
 		self.Bind(wx.EVT_CLOSE, self.Exit)
 
+	# Clear table and append new data
 	def refreshData(self, keyword, sort):
 		data = self.db.inst_query(keyword, sort)
 
@@ -66,6 +70,7 @@ class GridFrame(wx.Frame):
 				self.grid.SetReadOnly(j, i)
 			j += 1
 
+	# Instrument warehousing interface
 	def Warehouse(self, event):
 		self.whf = wx.Dialog(self, -1, u'入库', size = (190, 330), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
 		self.whf.ToggleWindowStyle(wx.STAY_ON_TOP)
@@ -102,11 +107,13 @@ class GridFrame(wx.Frame):
 		self.rf.ToggleWindowStyle(wx.STAY_ON_TOP)
 		self.rf.Show()
 
+	# Sort and refresh data
 	def Query(self, event):
 		keyword = self.colName[self.cb.GetSelection()]
 		sort = ['ASC', 'DESC']
 		self.refreshData(keyword, sort[self.rb.GetSelection()])
 
+	# Handle the add event
 	def addHandle(self, event):
 		count = self.whcount.GetValue()
 		if count == '0' or not count.isdigit():
@@ -128,7 +135,7 @@ class GridFrame(wx.Frame):
 
 		wx.MessageBox(u'添加成功', u'成功')
 		self.whf.Destroy()
-		self.refreshData()
+		self.Query(None)
 
 	def Exit(self, event):
 		self.Destroy()

@@ -30,8 +30,14 @@ class lab_db:
 		self.commit()
 
 	def inst_query(self, keyword, sort):
-		list = self.cur.execute('SELECT distinct Name,Model,Batch FROM Main ORDER BY %s %s'%(keyword, sort)).fetchall()
+		set = self.cur.execute('SELECT DISTINCT id,Name,Model,Batch FROM Main ORDER BY %s %s'%(keyword, sort)).fetchall()
 		result = []
-		for i in list:
-			result.append(self.cur.execute('SELECT Type,Name,Model,Spec,Cost,Count(Batch),Date,Manuf,Resp,Batch,Room FROM Main WHERE Name="%s" AND Model="%s" AND Batch=%s ORDER BY %s %s'%(i[0], i[1], i[2], keyword, sort)).fetchone())
+		for i in set:
+			temp = list(self.cur.execute('SELECT Type,Name,Model,Spec,Cost,Count(Batch),Date,Manuf,Resp,Batch,Room FROM Main WHERE Name="%s" AND Model="%s" AND Batch=%s ORDER BY %s %s'%(i[1], i[2], i[3], keyword, sort)).fetchone())
+			status = self.cur.execute('SELECT Status FROM Repair WHERE id=%s'%(i[0])).fetchone()
+			if status == None:
+				temp.append(u'正常')
+			else:
+				temp.append(status[0])
+			result.append(temp)
 		return result
