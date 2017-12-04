@@ -3,7 +3,7 @@ import wx
 import wx.grid
 import functions
 
-class GridFrame(wx.Frame):
+class GridFrame(wx.Dialog):
 	def __init__(self, parent):
 		self.initUI(parent)
 
@@ -14,7 +14,7 @@ class GridFrame(wx.Frame):
 		width = 0
 		for i in colSize:
 			width += i + 1
-		wx.Frame.__init__(self, parent, title = u'实验室设备管理系统', size = (width, 360), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
+		wx.Dialog.__init__(self, parent, title = u'实验室设备管理系统', size = (width, 360), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
 
 		self.btn1 = wx.Button(self, -1, u'设备入库', (0, 0), (80, 40))
 		self.btn2 = wx.Button(self, -1, u'维修管理', (90, 0), (80, 40))
@@ -57,6 +57,7 @@ class GridFrame(wx.Frame):
 				self.grid.SetReadOnly(j, i)
 			j += 1
 
+	# Clear repair table and append new data
 	def refreshDataRepair(self):
 		ChoiceEditor = wx.grid.GridCellChoiceEditor([u'已修复', u'维修中', u'报废'])
 		self.rgrid.ClearGrid()
@@ -110,13 +111,13 @@ class GridFrame(wx.Frame):
 		self.whf.Bind(wx.EVT_BUTTON, self.addHandle, self.whpostbtn)
 		self.whf.Show()
 
+	# Inctrument repairing interface
 	def Repair(self, event):
 		colLabel = (u'编号', u'费用', u'维修日期', u'修理厂家', u'负责人', u'状态')
 		colSize = (30, 50, 70, 80, 55, 50)
 		width = 0
 		for i in colSize:
 			width += i + 1
-
 		self.rf = wx.Dialog(self, -1, u'维修', size = (width, 330), style = wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX) | wx.FRAME_FLOAT_ON_PARENT)
 
 		wx.StaticText(self.rf, -1, u'损坏设备：', pos = (0, 5), size = (60, 20))
@@ -146,7 +147,6 @@ class GridFrame(wx.Frame):
 		self.rf.Bind(wx.grid.EVT_GRID_CELL_CHANGED, self.fixChangeHandle)
 		self.rf.Bind(wx.EVT_BUTTON, self.fixAddHandle, self.rbtn)
 		self.rf.Bind(wx.EVT_TEXT, self.checkVal, self.rcost)
-		self.rf.Bind(wx.EVT_CLOSE, self.kill)
 		self.rf.Show()
 
 	# Sort and refresh data
@@ -159,7 +159,7 @@ class GridFrame(wx.Frame):
 	# Handle the add event
 	def addHandle(self, event):
 		for i in range(int(self.whcount.GetValue())):
-			self.db.inst_add(self.whtype.GetValue(), self.whname.GetValue(), self.whmodel.GetValue(), self.whspec.GetValue(), cost, self.whdate.GetValue(), self.whmanuf.GetValue(), self.whresp.GetValue(), batch, self.whroom.GetValue())
+			self.db.inst_add(self.whtype.GetValue(), self.whname.GetValue(), self.whmodel.GetValue(), self.whspec.GetValue(), self.whcost.GetValue(), self.whdate.GetValue(), self.whmanuf.GetValue(), self.whresp.GetValue(), self.whbatch.GetValue(), self.whroom.GetValue())
 
 		wx.MessageBox(u'添加成功', u'成功')
 		self.whf.Destroy()
@@ -175,30 +175,23 @@ class GridFrame(wx.Frame):
 			obj.SetValue(value[:-1])
 		obj.SetInsertionPoint(len(obj.GetValue()))
 
+	# Handle the repair event
 	def fixAddHandle(self, event):
 		self.db.inst_repair(self.rcb.GetValue(), self.rcost.GetValue(), self.rdate.GetValue(), self.rserv.GetValue(), self.rresp.GetValue())
 		self.refreshDataRepair()
 		self.Query(None)
 
-	#!! grid cost valcheck not complete 
+	#!! grid cost valcheck not complete
 	def fixChangeHandle(self, event):
 		row = event.GetRow()
 		data = []
 		for i in range(6):
 			data.append(self.rgrid.GetCellValue(row, i))
-		
+
 		self.db.inst_repair_change(data[0], data[1], data[2], data[3], data[4], data[5])
 		self.Query(None)
 
-	# Kill dialog
-	def kill(self, event):
-		del self.rf
-		event.GetEventObject().Destroy()
-		self.Query(None)
-
 	def Exit(self, event):
-		del self.db
-		self.Destroy()
 		exit()
 
 if __name__ == '__main__':

@@ -35,7 +35,7 @@ class lab_db:
 			temp.append(u'正常')
 			result.append(temp)
 		for i in repair_set:
-			temp = list(self.cur.execute('SELECT Type,Name,Model,Spec,Cost,Count(Batch),Date,Manuf,Resp,Batch,Room FROM Main WHERE Name="%s" AND Model="%s" AND Batch=%s'%(i[1], i[2], i[3])).fetchone())
+			temp = list(self.cur.execute('SELECT Type,Name,Model,Spec,Cost,1,Date,Manuf,Resp,Batch,Room FROM Main WHERE Name="%s" AND Model="%s" AND Batch=%s'%(i[1], i[2], i[3])).fetchone())
 			temp.append(self.cur.execute('SELECT Status FROM Repair WHERE id=%d'%(i[0])).fetchone()[0])
 			result.append(temp)
 		return result
