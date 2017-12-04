@@ -15,19 +15,16 @@ class lab_db:
 		self.conn.close()
 
 	def inst_add(self, type, name, model, spec, cost, date, manuf, resp, batch, room):
-		self.cur.execute('INSERT INTO Main(Type,Name,Model,Spec,Cost,Date,Manuf,Resp,Batch,Room) VALUES("%s", "%s", "%s", "%s", %d, "%s", "%s", "%s", %d, "%s")'%(type, name, model, spec, cost, date, manuf, resp, batch, room))
+		self.cur.execute('INSERT INTO Main(Type,Name,Model,Spec,Cost,Date,Manuf,Resp,Batch,Room) VALUES("%s", "%s", "%s", "%s", %s, "%s", "%s", "%s", %s, "%s")'%(type, name, model, spec, cost, date, manuf, resp, batch, room))
 		self.conn.commit()
 
-	# incomplete
-	def inst_repair(self, id, count):
-		list = self.cur.execute('SELECT Count FROM Instrument WHERE id=%d'%id).fetchall()
+	def inst_repair(self, id, Cost, Date, Serv, Resp):
+		self.cur.execute(u'INSERT INTO Repair VALUES(%s, %s, "%s", "%s", "%s", "维修中")'%(id, Cost, Date, Serv, Resp))
+		self.conn.commit()
 
-	# incomplete
-	def inst_done_repair(self, Did, add):
-		count = self.drug_query('Did', Did, 'Dcount').fetchone()[0]
-		count += add
-		self.cur.execute('UPDATE Drug SET Dcount=%d WHRER Did=%d'%(count, Did))
-		self.commit()
+	def inst_repair_change(self, id, cost, date, serv, resp, stat):
+		self.cur.execute('UPDATE Repair SET Cost=%s,Date="%s",Serv="%s",Resp="%s",Status="%s" WHERE id=%s'%(cost, date, serv, resp, stat, id))
+		self.conn.commit()
 
 	def inst_query(self, keyword, sort):
 		set = self.cur.execute('SELECT DISTINCT Name,Model,Batch FROM Main WHERE id!=(SELECT id FROM Repair) ORDER BY %s %s'%(keyword, sort)).fetchall()
