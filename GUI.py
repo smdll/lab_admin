@@ -51,6 +51,8 @@ class GridFrame(wx.Dialog):
 			for i in range(len(line)):
 				if isinstance(line[i], int):
 					val = '%d'%line[i]
+				elif isinstance(line[i], float):
+					val = '%.2f'%line[i]
 				else:
 					val = line[i]
 				self.grid.SetCellValue(j, i, val)
@@ -69,6 +71,8 @@ class GridFrame(wx.Dialog):
 			for i in range(len(line)):
 				if isinstance(line[i], int):
 					val = '%d'%line[i]
+				elif isinstance(line[i], float):
+					val = '%.2f'%line[i]
 				else:
 					val = line[i]
 				if i == 5:
@@ -171,9 +175,12 @@ class GridFrame(wx.Dialog):
 		value = obj.GetValue()
 		if value == '':
 			obj.SetValue('1')
-		elif not value.isdigit():
-			obj.SetValue(value[:-1])
-		obj.SetInsertionPoint(len(obj.GetValue()))
+		else:
+			try:
+				float(value)
+			except ValueError:
+				obj.SetValue(value[:-1])
+				obj.SetInsertionPoint(len(obj.GetValue()))
 
 	# Handle the repair event
 	def fixAddHandle(self, event):

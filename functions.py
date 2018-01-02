@@ -19,11 +19,11 @@ class lab_db:
 		self.conn.commit()
 
 	def inst_repair(self, id, Cost, Date, Serv, Resp):
-		self.cur.execute(u'INSERT INTO Repair VALUES(%s, %s, "%s", "%s", "%s", "维修中")'%(id, Cost, Date, Serv, Resp))
+		self.cur.execute(u'INSERT INTO Repair VALUES(%s, %f, "%s", "%s", "%s", "维修中")'%(id, float(Cost), Date, Serv, Resp))
 		self.conn.commit()
 
 	def inst_repair_change(self, id, cost, date, serv, resp, stat):
-		self.cur.execute('UPDATE Repair SET Cost=%s,Date="%s",Serv="%s",Resp="%s",Status="%s" WHERE id=%s'%(cost, date, serv, resp, stat, id))
+		self.cur.execute('UPDATE Repair SET Cost=%f,Date="%s",Serv="%s",Resp="%s",Status="%s" WHERE id=%s'%(float(cost), date, serv, resp, stat, id))
 		self.conn.commit()
 
 	def inst_query(self, keyword, sort):
